@@ -6,7 +6,7 @@ const browserUrl = window.location.href
 
 // 백엔드 URL확인
 // 브라우저 주소창의 URL이 betaUrl이랑 같지 않으면
-const url = window.location.href != openBetaUrl
+const url = browserUrl.slice(0, 44) != openBetaUrl
     ? getTestServerAddress(browserUrl, "7500") + "/v1/shop/" : openBetaUrl + "/v1/shop/";
 
 // 매장리스트 MAP
@@ -49,7 +49,7 @@ function search() {
 
 // 테이블 데이터 수정 후 request 하는 함수
 function editShopInfo() {
-    //const body = getFormData('dataAddModalForm');
+
 }
 
 // 테이블 데이터 제거 후 request 하는 함수
