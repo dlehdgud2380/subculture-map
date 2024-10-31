@@ -1,18 +1,13 @@
 /* otaroad.admin.request.js by LeeDongHyeong */
 
 // 백엔드 서버 주소 설정
-const ipV4regex = /(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}/g;
-const urlRegex = /^(https?|ftp):\/\/(-\.)?([^\s\/?\.#-]+\.?)+(\/[^\s]*)?$/i;
-const betaUrl = 'https://otaroad-oracle-cloud.wahoo-in.ts.net';
+const openBetaUrl = 'https://otaroad-oracle-cloud.wahoo-in.ts.net';
 const browserUrl = window.location.href
-const backendPort = ':7500'
 
 // 백엔드 URL확인
 // 브라우저 주소창의 URL이 betaUrl이랑 같지 않으면
-const url = window.location.href != betaUrl
-    ? ipV4regex(browserUrl) + backendPort + "/v1/shop/" : betaUrl + "/v1/shop/";
-
-console.log(url);
+const url = window.location.href != openBetaUrl
+    ? getTestServerAddress(browserUrl, "7500") + "/v1/shop/" : openBetaUrl + "/v1/shop/";
 
 // 매장리스트 MAP
 let shopList = new Map();
@@ -54,7 +49,7 @@ function search() {
 
 // 테이블 데이터 수정 후 request 하는 함수
 function editShopInfo() {
-
+    //const body = getFormData('dataAddModalForm');
 }
 
 // 테이블 데이터 제거 후 request 하는 함수
@@ -123,8 +118,7 @@ function setRequest(method, body) {
 // 요청 핸들링
 function handleResponse(response) {
     if (!response.ok) {
-        throw new Error('Network response was not ok');
-        alert("Network response was not ok")
+        throw new Error(response);
     }
     return response.json();
 }
