@@ -134,133 +134,120 @@ function makeBasicTempete(shopId="", ModalName, editable=false) {
 }
 */
 
-/*
-    datainfomodal에서 '수정' 버튼을 눌렀을 경우 event가 발생하면서
-    datainfoModal이 열리는 동시에 데이터를 수정할 수 있는 FormUI가 생성할 수 있도록
-    도와주는 함수
+/* datainfomodal에 json 데이터 바탕으로 inputgroup 생성해주는 함수
+  keynum: shopKeyList의 인덱스 넘버
+  shopData: 매장 데이터 정보가 담긴 map
 */
-function editShopInfo(shopId) {
-    //loadShopInfo(shopId, true);
-    console.log("test");
+function generateModalInfo(keynum, shopData) {
+    const objectKeyName = shopKeyList[keynum];
+
+    const inputGroup = document.createElement("div");
+    inputGroup.setAttribute("class", "input-group mb-3");
+
+    const span = document.createElement("span");
+    const spanText = document.createTextNode(objectKeyName);
+    span.setAttribute("class", "input-group-text");
+    span.setAttribute("id", "input-disabled-" + objectKeyName);
+    span.appendChild(spanText);
+
+    const input = document.createElement("input");
+    input.setAttribute("type", "text");
+    input.setAttribute("class", "form-control");
+    input.setAttribute("disabled", "");
+
+    const textarea = document.createElement("textarea");
+
+    switch (objectKeyName) {
+
+        case "workTime":
+            textarea.setAttribute("class", "form-control");
+            textarea.setAttribute("rows", "3");
+            textarea.setAttribute("disabled", "");
+
+            const worktimeText = document.createTextNode(shopData[objectKeyName]);
+            textarea.appendChild(worktimeText);
+
+            inputGroup.appendChild(span);
+            inputGroup.appendChild(textarea);
+            break;
+
+        case "content":
+            textarea.setAttribute("class", "form-control");
+            textarea.setAttribute("rows", "7");
+            textarea.setAttribute("disabled", "");
+
+            const contentText = document.createTextNode(shopData[objectKeyName]);
+            textarea.appendChild(contentText);
+
+            inputGroup.appendChild(span);
+            inputGroup.appendChild(textarea);
+            break;
+
+        case "location":
+            input.setAttribute("value", locationList.get(shopData["location"]).location);
+            inputGroup.appendChild(span);
+            inputGroup.appendChild(input);
+            break;
+
+        case "shopType":
+            let tagText = "";
+            const shopTypeLength = shopData["shopType"].length;
+            for (let i = 0; i < shopTypeLength; i++) {
+                let typenum = shopData["shopType"][i];
+                i === shopTypeLength - 1 ? tagText += shopTypeList.get(typenum).type : tagText += shopTypeList.get(typenum).type + ", "
+            }
+            input.setAttribute("value", tagText);
+            inputGroup.appendChild(span);
+            inputGroup.appendChild(input);
+            break;
+
+        default:
+            input.setAttribute("value", shopData[objectKeyName] == null ? "정보없음" : shopData[objectKeyName]);
+            inputGroup.appendChild(span);
+            inputGroup.appendChild(input);
+    }
+
+    return inputGroup;
 }
 
 /* row 하나 클릭했을 때 매장 정보를 모달로 불러오는 함수
+  연관된 모달: dataInfoModal
   shopId: response 받은 데이터 내의 shoplist 보면 id라고 적힌 것
-  editable: 각각 오브젝트를 수정가능하게 만들것인지 안되게 할 것인지 확인
 */
-function loadShopInfo(shopId, editable = false) {
+function loadShopInfo(shopId) {
 
     // 매장 ID로 해당하는 매장정보 가져오기
     const shopData = shopList.get(shopId);
 
     // 모달 표시
     const dataInfoModal = new bootstrap.Modal('#dataInfoModal');
-    dataInfoModal.toggle();
+    dataInfoModal.show();
 
     // 모달 라벨 설정
     const dataInfoModalLabel = document.querySelector("#dataInfoModalLabel");
     dataInfoModalLabel.innerText = " '" + shopData.name + "' 매장정보";
-    if (editable == true) {
-        dataInfoModalLabel.innerText = "매장정보 수정";
-    }
 
-    // 모달 수정 버튼 설정
-    const dataInfoModalEditButton = document.querySelector("#dataEditButton");
-    dataInfoModalEditButton.addEventListener("click", () => {
-        //dataInfoModal.hide();
-        //loadShopInfo(shopId, true);
-    })
-
-    // modal body 안에 있는 input group text 안에 데이터 넣기
+    // 모달바디 html dom 가져오기
     const dataInfoModalBodyContainer = document.getElementById("dataInfoModal-Body-Container");
     dataInfoModalBodyContainer.innerText = ""; // 내용 초기화
 
+    // 모달 내 수정 버튼 설정
+    const dataInfoEditButton = document.querySelector("#dataEditButton");
+    dataInfoEditButton.addEventListener("click", () => {
+        dataInfoModalLabel.innerText = " '" + shopData.name + "' 수정";
+        dataInfoModalBodyContainer.innerText = ""; // 내용 초기화
+        for (let i = 0; i < shopKeyList.length; i++) {
+            dataInfoModalBodyContainer.appendChild(generateModalInfo(i, shopData, true));
+        }
+    })
+
+    // modal body 안에 있는 input group text 안에 데이터 넣기
     // object의 Key만큼 반복
     for (let i = 0; i < shopKeyList.length; i++) {
-        const objectKeyName = shopKeyList[i];
-
-        const inputGroup = document.createElement("div");
-        inputGroup.setAttribute("class", "input-group mb-3");
-
-        const span = document.createElement("span");
-        const spanText = document.createTextNode(objectKeyName);
-        span.setAttribute("class", "input-group-text");
-        if (editable != true) {
-            span.setAttribute("id", "input-disabled-" + objectKeyName);
-        }
-        span.appendChild(spanText);
-
-        const input = document.createElement("input");
-        input.setAttribute("type", "text");
-        input.setAttribute("class", "form-control");
-        if (editable != true) {
-            input.setAttribute("disabled", "");
-        }
-
-
-        const textarea = document.createElement("textarea");
-
-        switch (objectKeyName) {
-
-            case "workTime":
-                textarea.setAttribute("class", "form-control");
-                textarea.setAttribute("rows", "3");
-                if (editable != true) {
-                    textarea.setAttribute("disabled", "");
-                }
-
-
-                const worktimeText = document.createTextNode(shopData[objectKeyName]);
-                textarea.appendChild(worktimeText);
-
-                inputGroup.appendChild(span);
-                inputGroup.appendChild(textarea);
-                break;
-
-            case "content":
-                textarea.setAttribute("class", "form-control");
-                textarea.setAttribute("rows", "7");
-                if (editable != true) {
-                    textarea.setAttribute("disabled", "");
-                }
-
-                const contentText = document.createTextNode(shopData[objectKeyName]);
-                textarea.appendChild(contentText);
-
-                inputGroup.appendChild(span);
-                inputGroup.appendChild(textarea);
-                break;
-
-            case "location":
-                input.setAttribute("value", locationList.get(shopData["location"]).location);
-                inputGroup.appendChild(span);
-                inputGroup.appendChild(input);
-                break;
-
-            case "shopType":
-                let tagText = "";
-                const shopTypeLength = shopData["shopType"].length;
-                for (let i = 0; i < shopTypeLength; i++) {
-                    let typenum = shopData["shopType"][i];
-                    i === shopTypeLength - 1 ? tagText += shopTypeList.get(typenum).type : tagText += shopTypeList.get(typenum).type + ", "
-                }
-                input.setAttribute("value", tagText);
-                inputGroup.appendChild(span);
-                inputGroup.appendChild(input);
-                break;
-
-            default:
-                input.setAttribute("value", shopData[objectKeyName] == null ? "정보없음" : shopData[objectKeyName]);
-                inputGroup.appendChild(span);
-                inputGroup.appendChild(input);
-        }
-
-        dataInfoModalBodyContainer.appendChild(inputGroup);
+        dataInfoModalBodyContainer.appendChild(generateModalInfo(i, shopData, false));
     }
 
 }
-
-
 
 
 /*
@@ -329,22 +316,21 @@ function createShopInfo() {
 
             case "photo":
                 input.setAttribute("disabled", "");
-
-
+                input.setAttribute("placeholder", "추후 구현 예정")
                 inputGroup.appendChild(span);
                 inputGroup.appendChild(input);
                 break;
 
             case "x":
                 input.setAttribute("disabled", "");
-
+                input.setAttribute("placeholder", "자동으로 생성됨")
                 inputGroup.appendChild(span);
                 inputGroup.appendChild(input);
                 break;
 
             case "y":
                 input.setAttribute("disabled", "");
-
+                input.setAttribute("placeholder", "자동으로 생성됨")
                 inputGroup.appendChild(span);
                 inputGroup.appendChild(input);
                 break;
@@ -453,7 +439,7 @@ function getFormData(modalFormId) {
         objectBody[keyName] = formData[keyName].value
     }
 
-    console.log(objectBody);
+    //console.log(objectBody);
 
     return objectBody;
 }
